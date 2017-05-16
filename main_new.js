@@ -20,8 +20,8 @@ var character,
 var sncf = {
     preload: function(){
         game.load.image('character','img/ed.png');
-        game.load.image('hole','img/trou.png');
-        game.load.image('hole_neg','img/trou-neg.png');
+        game.load.image('hole','img/Trou.png');
+        game.load.image('hole_neg','img/Trou-neg.png');
         game.load.image('mountain','img/bossex3.png');
         game.load.image('mountain_neg','img/bossex3-neg.png');
         game.load.image('line','img/line.png');
