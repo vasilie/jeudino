@@ -1,8 +1,8 @@
-var game = new Phaser.Game(1200,900);
+var game = new Phaser.Game(1200,675);
 
 var character,
     obstacleXOffset,
-    obstaclesXPosList,
+    obstaclesList,
     closestObstacleXPos,
     lastObstacleXPos,
     blueBackground,
@@ -13,8 +13,8 @@ var character,
     currentBgIsDark,
     lineScale,
     blueBgOffset = 0,
-    blueRectangleXEndList,
     obstaclesCount,
+    restartLabelXPos,
     currentSpeed;
 
 var sncf = {
@@ -22,8 +22,12 @@ var sncf = {
         game.load.image('character','img/ed.png');
         game.load.image('hole','img/Trou.png');
         game.load.image('hole_neg','img/Trou-neg.png');
-        game.load.image('mountain','img/bossex3.png');
-        game.load.image('mountain_neg','img/bossex3-neg.png');
+        game.load.image('mountain_3','img/bossex3.png');
+        game.load.image('mountain_3_neg','img/bossex3-neg.png');
+        game.load.image('mountain_2','img/bossex2.png');
+        game.load.image('mountain_2_neg','img/bossex2-neg.png');
+        game.load.image('mountain_1','img/bossex1.png');
+        game.load.image('mountain_1_neg','img/bossex1-neg.png');
         game.load.image('line','img/line.png');
         game.load.image('ground','img/ground.jpg');
         game.load.image('background','img/fond.jpg');
@@ -31,7 +35,6 @@ var sncf = {
         game.load.image('yellow','img/reb-2.png');
         game.load.image('blue','img/reb-1.png');
         game.load.audio('bg_music', ['audio/bg_music.mp3', 'audio/bg_music.ogg']);
-        game.load.audio('game_over', ['audio/game_over.mp3', 'audio/game_over.ogg']);
         game.load.audio('jump', ['audio/jump.mp3', 'audio/jump.ogg']);
         game.load.physics("sprite_physics", "sprite_physics.json");
     },
@@ -39,19 +42,19 @@ var sncf = {
     create: function(){
         // Setup game basic params
         game.stage.backgroundColor = '#fff';
-        game.world.setBounds(0, 0, 190020, 1100);
+        game.world.setBounds(0, 0, 190020, 1070);
         game.world.scale.x = 0.7;
         game.world.scale.y = 0.7;
         obstacleXOffset= 0;
-        obstaclesXPosList = [];
+        obstaclesList = [];
         closestObstacleXPos = 0;
-        currentSpeed = 300;
+        currentSpeed = 400;
         score = 0;
         gameStarted = false;
         currentBgIsDark = false;
         isDarkMode = false;
         obstaclesCount = 0;
-        blueRectangleXEndList = [];
+        restartLabelXPos = 0;
 
         // Setup physics
         game.physics.startSystem(Phaser.Physics.P2JS);
@@ -64,12 +67,13 @@ var sncf = {
         this.createObstacle();
 
         // Setup audio files
-        this.bgMusic = game.add.audio('bg_music');
-        this.jumpSound = game.add.audio('jump');
-        this.gameOverSound = game.add.audio('game_over');
+        this.bgMusic = new Audio('audio/bg_music.mp3');
+        this.jumpSound = new Audio('audio/jump.mp3');
+        this.gameOverSound = new Audio('audio/game_over.mp3');
 
         // Play background audio
         this.bgMusic.play();
+        this.bgMusic.volume = 0.02;
 
         var scoreCountStyle = { font: "bold 82px Arial", fill: "#333", boundsAlignH: "right", boundsAlignV: "right" };
         this.scoreCountLabel = game.add.text(1000, 25, "00000", scoreCountStyle);
@@ -89,32 +93,45 @@ var sncf = {
         }
 
         // If user is pressing [SPACE] and character is on the line, do something (jump)
-        if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) && this.character.body.y > 720)
+        if ((game.input.keyboard.isDown(Phaser.Keyboard.UP) ||
+            game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
+            && this.character.body.y > 720)
         {
             this.jump();
         }
 
         // Check if user is hitting the closest obstacle, if not add 1 point
-        if (this.character.body.x > closestObstacleXPos - 120
-            && this.character.body.x < closestObstacleXPos + 120
-            && this.character.body.y > 720) {
-            this.gameOver();
+        if (this.character.body.x > closestObstacleXPos['xPos'] - 120
+            && this.character.body.x < closestObstacleXPos['xPos'] + 120
+            && this.character.body.y > 700
+            && closestObstacleXPos['type'] === 0) {
+            this.gameOver(400);
         }
-        else if (this.character.body.x > closestObstacleXPos - 120
-            && this.character.body.x < closestObstacleXPos + 120
-            && lastObstacleXPos !== closestObstacleXPos) {
+        else if (this.character.body.x > closestObstacleXPos['xPos'] - 125
+            && this.character.body.x < closestObstacleXPos['xPos'] + 15
+            && this.character.body.y > 670
+            && closestObstacleXPos['type'] === 1) {
+            this.gameOver(0);
+        }
+        else if (this.character.body.x > closestObstacleXPos['xPos'] - 120
+            && this.character.body.x < closestObstacleXPos['xPos'] + 120
+            && lastObstacleXPos !== closestObstacleXPos['xPos']) {
             score += 1;
             var s = "000000000" + score;
             // Add leading zeros to score
             this.scoreCountLabel.setText(s.substr(s.length-5));
-            lastObstacleXPos = closestObstacleXPos;
+            lastObstacleXPos = closestObstacleXPos['xPos'];
         }
     },
 
     createObstacle:function(){
         // var lineScale = 1;
-        if ((obstaclesCount.toString().slice(-1) === "5"
-            || obstaclesCount.toString().slice(-1) === "6"
+        if (obstaclesCount.toString().slice(-1) === "5") {
+            isDarkMode = true;
+
+            currentSpeed += 50;
+        }
+        else if ((obstaclesCount.toString().slice(-1) === "6"
             || obstaclesCount.toString().slice(-1) === "7"
             || obstaclesCount.toString().slice(-1) === "8"
             || obstaclesCount.toString().slice(-1) === "9")
@@ -139,14 +156,9 @@ var sncf = {
         var obstacleType = Math.floor(Math.random() * 2);
         // var obstacleType = 0;
 
-        // Create a line
-        /* var line = this.game.add.sprite(obstacleXOffset,900,"line");
-        line.width = lineWidth;
-        game.physics.p2.enable(line);
-        line.body.fixedRotation = true;
-        line.body.static = true;
-        line.scale.x = lineScale; */
-
+        /**
+         * First, create a visual line
+         */
         var line = game.add.graphics(obstacleXOffset,900);
         if (isDarkMode) {
             line.lineStyle(18,0xffffff);
@@ -158,7 +170,7 @@ var sncf = {
         line.lineTo(lineWidth,0);
 
         /**
-         * Create another line, only used for P2 physics
+         * Create a second line, only used for P2 physics
          */
         line = game.add.graphics(obstacleXOffset + (lineWidth / 2),900);
         line.lineStyle(0,0xffffff);
@@ -172,19 +184,17 @@ var sncf = {
         // If currently in dark mode, create a blue background
         if (isDarkMode) {
             // currentSpeed += 200;
-            var blueRectangleBg = game.add.graphics(obstacleXOffset, -300);
+            var blueRectangleBg = game.add.graphics(obstacleXOffset + 10, -300);
             blueRectangleBg.beginFill(0x0f85c2);
             blueRectangleBg.lineStyle(18,0x0f85c2);
             // Hole
             if (obstacleType === 0) {
-                blueRectangleBg.drawRect(0, 0, lineWidth + 331, 1900);
+                blueRectangleBg.drawRect(0, 0, lineWidth + 290, 1900);
             }
             // Mountain
             else {
-                blueRectangleBg.drawRect(0, 0, lineWidth + 354, 1900);
+                blueRectangleBg.drawRect(0, 0, lineWidth + 350, 1900);
             }
-
-            blueRectangleXEndList.push(obstacleXOffset + 5000);
 
             var blueRectsBgGroup = game.add.group();
             blueRectsBgGroup.add(blueRectangleBg);
@@ -214,34 +224,57 @@ var sncf = {
         else {
             // Create a mountain
             var mountain;
+            var mountainWidth = Math.floor(Math.random() * 3 + 1);
+
             if (isDarkMode) {
-                mountain = this.game.add.sprite(obstacleXPos + 20,878,"mountain_neg");
+                switch(mountainWidth) {
+                    case 1:
+                        mountain = this.game.add.sprite(obstacleXPos - 94,878,"mountain_" + mountainWidth + "_neg");
+                        break;
+                    case 2:
+                        mountain = this.game.add.sprite(obstacleXPos - 35,878,"mountain_" + mountainWidth + "_neg");
+                        break;
+                    case 3:
+                        mountain = this.game.add.sprite(obstacleXPos + 25,878,"mountain_" + mountainWidth + "_neg");
+                        break;
+                }
             }
             else {
-                mountain = this.game.add.sprite(obstacleXPos + 20,878,"mountain");
+                switch(mountainWidth) {
+                    case 1:
+                        mountain = this.game.add.sprite(obstacleXPos - 94,878,"mountain_" + mountainWidth);
+                        break;
+                    case 2:
+                        mountain = this.game.add.sprite(obstacleXPos - 35,878,"mountain_" + mountainWidth);
+                        break;
+                    case 3:
+                        mountain = this.game.add.sprite(obstacleXPos + 25,878,"mountain_" + mountainWidth);
+                        break;
+                }
             }
+
             game.physics.p2.enable(mountain);
             mountain.body.fixedRotation = true;
             mountain.body.static = true;
             mountain.body.outOfBoundsKill = true;
 
-            obstacleXOffset += lineWidth + mountain.width - 20;
+            obstacleXOffset += lineWidth + 115 * mountainWidth;
         }
 
         obstaclesCount += 1;
 
         // Store obstacles coords in array
-        obstaclesXPosList.push(obstacleXPos);
+        obstaclesList.push({ xPos: obstacleXPos, type: obstacleType });
 
         var newXObstaclePosList = [];
         // Remove useless old X positions of obstacles
-        for (var i = 0; i < obstaclesXPosList.length; i++) {
+        for (var i = 0; i < obstaclesList.length; i++) {
             // If character is beyond current obstacle, delete it
-            if (obstaclesXPosList[i] > this.character.body.x) {
-                newXObstaclePosList.push(obstaclesXPosList[i]);
+            if (obstaclesList[i]['xPos'] > this.character.body.x) {
+                newXObstaclePosList.push(obstaclesList[i]);
             }
         }
-        obstaclesXPosList = newXObstaclePosList;
+        obstaclesList = newXObstaclePosList;
 
         this.getClosestObstacleXPos();
 
@@ -249,24 +282,24 @@ var sncf = {
     },
 
     getClosestObstacleXPos: function() {
-        var curr = obstaclesXPosList[0];
+        var curr = obstaclesList[0];
         var diff = Math.abs (this.character.body.x - curr);
-        for (var val = 0; val < obstaclesXPosList.length; val++) {
-            var newdiff = Math.abs (this.character.body.x - obstaclesXPosList[val]);
+        for (var val = 0; val < obstaclesList.length; val++) {
+            var newdiff = Math.abs (this.character.body.x - obstaclesList[val]['xPos']);
             if (newdiff < diff) {
                 diff = newdiff;
-                curr = obstaclesXPosList[val];
             }
         }
         closestObstacleXPos = curr;
+
         return curr;
     },
     
     createTrafficLights: function() {
         // Setup traffic lights
-        var feuRouge = game.add.sprite(300,50,'red');
-        var feuJaune = game.add.sprite(300,130,'yellow');
-        var feuBleu = game.add.sprite(300,210,'blue');
+        var feuRouge = game.add.sprite(300,200,'red');
+        var feuJaune = game.add.sprite(300,280,'yellow');
+        var feuBleu = game.add.sprite(300,360,'blue');
         feuRouge.alpha = 0;
         feuJaune.alpha = 0;
         feuBleu.alpha = 0;-
@@ -276,7 +309,7 @@ var sncf = {
         var b = game.add.tween(feuBleu).to( { alpha: 1 }, 1, "Linear", true, 2500);
         b.onComplete.add(function(){
             var goTextStyle = { font: "bold 252px Arial", fill: "#DDD", boundsAlignH: "right", boundsAlignV: "right" };
-            this.goText = game.add.text(450,10, "GO!", goTextStyle);
+            this.goText = game.add.text(450,160, "GO!", goTextStyle);
             this.goText.alpha = 0;
             game.add.tween(this.goText).to({alpha:1},1,"Linear",true);
             gameStarted = true;
@@ -298,8 +331,9 @@ var sncf = {
     },
 
     jump: function() {
-        this.character.body.velocity.y = -650;
+        this.character.body.velocity.y = -700;
         this.jumpSound.play();
+        this.jumpSound.volume = 1;
     },
 
     render: function() {
@@ -308,12 +342,13 @@ var sncf = {
         game.debug.geom(blueBackground, 'rgba(200,0,0,0.5)');
     },
 
-    gameOver: function() {
-        this.gameOverSound.play();
-
+    gameOver: function(timeoutDuration) {
         var __this = this;
+
         setTimeout(function() {
-            __this.game.paused = true;
+            __this.character.body.dynamic = false;
+            __this.character.body.static = true;
+            game.physics.p2.gravity.y = 0;
 
             var gameOverLabelStyle = { font: "bold 82px Arial", fill: "#333", boundsAlignH: "right", boundsAlignV: "right" };
             var gameOverLabel = game.add.text(__this.character.body.x - 270, 250, "GAME OVER", gameOverLabelStyle);
@@ -324,10 +359,19 @@ var sncf = {
             restartLabel.inputEnabled = true;
             restartLabel.events.onInputDown.add(__this.restartGame, this, 0);
             restartLabel.fixedToCamera = true;
-        }, 400);
+
+            restartLabelXPos = restartLabel.x;
+
+            __this.game.paused = true;
+
+            __this.game.input.onDown.add(__this.restartGame, self);
+
+            __this.gameOverSound.play();
+        }, timeoutDuration);
     },
 
-    restartGame: function() {
+    restartGame: function(event) {
+        game.paused = false;
         game.state.start('sncf');
     }
 };
