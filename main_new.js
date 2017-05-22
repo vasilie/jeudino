@@ -15,6 +15,7 @@ var character,
     blueBgOffset = 0,
     obstaclesCount,
     restartLabelXPos,
+    isGamePaused,
     currentSpeed;
 
 var sncf = {
@@ -29,6 +30,9 @@ var sncf = {
         game.load.image('mountain_1','img/bossex1.png');
         game.load.image('mountain_1_neg','img/bossex1-neg.png');
         game.load.image('line','img/line.png');
+        game.load.image('drone','img/drone.png');
+        game.load.image('drone_neg','img/drone-neg.png');
+        game.load.image('game_over_banner','img/game-over-banner.png');
         game.load.image('ground','img/ground.jpg');
         game.load.image('background','img/fond.jpg');
         game.load.image('red','img/reb-3.png');
@@ -75,7 +79,7 @@ var sncf = {
         this.bgMusic.play();
         this.bgMusic.volume = 0.02;
 
-        var scoreCountStyle = { font: "bold 82px Arial", fill: "#333", boundsAlignH: "right", boundsAlignV: "right" };
+        var scoreCountStyle = { font: "bold 82px Arial", fill: "#33", boundsAlignH: "right", boundsAlignV: "right" };
         this.scoreCountLabel = game.add.text(1000, 25, "00000", scoreCountStyle);
         this.scoreCountLabel.fixedToCamera = true;
 
@@ -101,8 +105,8 @@ var sncf = {
         }
 
         // Check if user is hitting the closest obstacle, if not add 1 point
-        if (this.character.body.x > closestObstacleXPos['xPos'] - 120
-            && this.character.body.x < closestObstacleXPos['xPos'] + 120
+        if (this.character.body.x > closestObstacleXPos['xPos'] - 80
+            && this.character.body.x < closestObstacleXPos['xPos'] + 80
             && this.character.body.y > 700
             && closestObstacleXPos['type'] === 0) {
             this.gameOver(400);
@@ -140,6 +144,21 @@ var sncf = {
         }
         else {
             isDarkMode = false;
+        }
+
+        /**
+         * Spawn a drone
+         */
+        var spawnDrone = Math.floor(Math.random() * 3);
+
+        var drone;
+        if (spawnDrone === 1) {
+            if (isDarkMode) {
+                drone = this.game.add.sprite(obstacleXOffset,Math.floor(Math.random() * 200 + 300),"drone_neg");
+            }
+            else {
+                drone = this.game.add.sprite(obstacleXOffset,Math.floor(Math.random() * 200 + 300),"drone");
+            }
         }
 
         /**
@@ -350,19 +369,22 @@ var sncf = {
             __this.character.body.static = true;
             game.physics.p2.gravity.y = 0;
 
-            var gameOverLabelStyle = { font: "bold 82px Arial", fill: "#333", boundsAlignH: "right", boundsAlignV: "right" };
-            var gameOverLabel = game.add.text(__this.character.body.x - 270, 250, "GAME OVER", gameOverLabelStyle);
-            gameOverLabel.fixedToCamera = true;
+            /**
+             * Create game over screen
+             */
+            var gameOverBanner = this.game.add.sprite(__this.character.body.x - 400, 250,"game_over_banner");
+            gameOverBanner.fixedToCamera = true;
+            gameOverBanner.width = 546 * 1.4;
+            gameOverBanner.height = 370 * 1.4;
 
-            var restartLabelStyle = { font: "bold 55px Arial", fill: "#333", boundsAlignH: "right", boundsAlignV: "right" };
-            var restartLabel = game.add.text(__this.character.body.x - 220, 400, "Recommencer", restartLabelStyle);
-            restartLabel.inputEnabled = true;
-            restartLabel.events.onInputDown.add(__this.restartGame, this, 0);
-            restartLabel.fixedToCamera = true;
+            var scoreLabelStyle = { font: "bold 95px Arial", fill: "#ae3738", boundsAlignH: "right", boundsAlignV: "right" };
+            var scoreLabel = game.add.text(__this.character.body.x - 40, 500, score, scoreLabelStyle);
+            scoreLabel.fixedToCamera = true;
 
-            restartLabelXPos = restartLabel.x;
+            restartLabelXPos = scoreLabel.x;
 
             __this.game.paused = true;
+            isGamePaused = true;
 
             __this.game.input.onDown.add(__this.restartGame, self);
 
@@ -372,9 +394,16 @@ var sncf = {
 
     restartGame: function(event) {
         game.paused = false;
+        isGamePaused = false;
         game.state.start('sncf');
     }
 };
+
+document.body.onkeyup = function(e){
+    if(e.keyCode === 32 && isGamePaused){
+        sncf.restartGame();
+    }
+}
 
 game.state.add('sncf',sncf);
 game.state.start('sncf');
