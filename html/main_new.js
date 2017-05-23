@@ -377,8 +377,9 @@ var sncf = {
             gameOverBanner.width = 546 * 1.4;
             gameOverBanner.height = 370 * 1.4;
 
-            var scoreLabelStyle = { font: "bold 95px Arial", fill: "#ae3738", boundsAlignH: "right", boundsAlignV: "right" };
+            var scoreLabelStyle = { font: "bold 95px Arial", fill: "#ae3738", boundsAlignH: "center", boundsAlignV: "middle" };
             var scoreLabel = game.add.text(__this.character.body.x - 40, 500, score, scoreLabelStyle);
+            scoreLabel.anchor.setTo(0.25,0);
             scoreLabel.fixedToCamera = true;
 
             restartLabelXPos = scoreLabel.x;
