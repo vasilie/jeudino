@@ -29,6 +29,18 @@ var sncf = {
         game.load.image('mountain_2_neg','img/bossex2-neg.png');
         game.load.image('mountain_1','img/bossex1.png');
         game.load.image('mountain_1_neg','img/bossex1-neg.png');
+
+        game.load.image('decor_1','img/decor1.png');
+        game.load.image('decor_1_neg','img/decor1-neg.png');
+        game.load.image('decor_2','img/decor2.png');
+        game.load.image('decor_2_neg','img/decor2-neg.png');
+        game.load.image('decor_3','img/decor3.png');
+        game.load.image('decor_3_neg','img/decor3-neg.png');
+        game.load.image('decor_4','img/decor4.png');
+        game.load.image('decor_4_neg','img/decor4-neg.png');
+        game.load.image('decor_5','img/decor5.png');
+        game.load.image('decor_5_neg','img/decor5-neg.png');
+
         game.load.image('line','img/line.png');
         game.load.image('drone','img/drone.png');
         game.load.image('drone_neg','img/drone-neg.png');
@@ -173,6 +185,38 @@ var sncf = {
                 drone = this.game.add.sprite(obstacleXOffset,Math.floor(Math.random() * 200 + 300),"drone");
             }
         }
+
+        /**
+         * Spawn a decor
+         */
+        var decorType = Math.floor(Math.random() * 5) + 1;
+        var decorYPos = 0;
+
+        if (decorType === 1) {
+            decorYPos = 650;
+        }
+        else if (decorType === 2) {
+            decorYPos = 470;
+        }
+        else if (decorType === 3) {
+            decorYPos = 700;
+        }
+        else if (decorType === 4) {
+            decorYPos = 650;
+        }
+        else if (decorType === 5) {
+            decorYPos = 680;
+        }
+
+        var decor;
+        if (isDarkMode) {
+            decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType + "_neg");
+        }
+        else {
+            decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType);
+        }
+
+        console.log("decor_" + decorType);
 
         /**
          * If first obstacle, make a long line
@@ -328,7 +372,7 @@ var sncf = {
 
         return curr;
     },
-
+    
     createTrafficLights: function() {
         // Setup traffic lights
         var feuRouge = game.add.sprite(300,200,'red');
@@ -338,7 +382,7 @@ var sncf = {
         feuJaune.alpha = 0;
         feuBleu.alpha = 0;-
 
-            game.add.tween(feuRouge).to( { alpha: 1 }, 1, "Linear", true, 500);
+        game.add.tween(feuRouge).to( { alpha: 1 }, 1, "Linear", true, 500);
         game.add.tween(feuJaune).to( { alpha: 1 }, 1, "Linear", true, 1500);
         var b = game.add.tween(feuBleu).to( { alpha: 1 }, 1, "Linear", true, 2500);
         b.onComplete.add(function(){
@@ -372,7 +416,7 @@ var sncf = {
 
     render: function() {
         /* game.debug.cameraInfo(game.camera, 32, 32);
-         game.debug.spriteCoords(this.character, 32, 500); */
+        game.debug.spriteCoords(this.character, 32, 500); */
         game.debug.geom(blueBackground, 'rgba(200,0,0,0.5)');
     },
 
