@@ -395,6 +395,7 @@ var sncf = {
 
             var scoreLabelStyle = { font: "bold 95px Arial", fill: "#ae3738", boundsAlignH: "center", boundsAlignV: "middle" };
             var scoreLabel = game.add.text(__this.character.body.x - 40, 500, score, scoreLabelStyle);
+            scoreLabel.anchor.setTo(0.25,0);
             scoreLabel.fixedToCamera = true;
             // scoreLabel.setTextBounds(__this.character.body.x - 200, 450, __this.character.body.x + 200, 550);
 
