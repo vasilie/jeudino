@@ -112,10 +112,24 @@ var sncf = {
             this.gameOver(400);
         }
         else if (this.character.body.x > closestObstacleXPos['xPos'] - 125
-            && this.character.body.x < closestObstacleXPos['xPos'] + 15
+            && this.character.body.x < closestObstacleXPos['xPos'] + 125
             && this.character.body.y > 670
             && closestObstacleXPos['type'] === 1) {
-            this.gameOver(0);
+            console.log('width was ' + closestObstacleXPos['width']);
+
+            if (closestObstacleXPos['width'] === 1 &&
+                this.character.body.x > closestObstacleXPos['xPos'] - 100
+                && this.character.body.x < closestObstacleXPos['xPos'] - 80) {
+                this.gameOver(0);
+            }
+            else if (closestObstacleXPos['width'] === 2 &&
+                this.character.body.x > closestObstacleXPos['xPos'] - 110
+                && this.character.body.x < closestObstacleXPos['xPos'] + 50) {
+                this.gameOver(0);
+            }
+            else if (closestObstacleXPos['width'] === 3) {
+                this.gameOver(0);
+            }
         }
         else if (this.character.body.x > closestObstacleXPos['xPos'] - 120
             && this.character.body.x < closestObstacleXPos['xPos'] + 120
@@ -200,6 +214,8 @@ var sncf = {
         line.body.static = true;
         line.body.outOfBoundsKill = true;
 
+        var mountainWidth = 0;
+
         // If currently in dark mode, create a blue background
         if (isDarkMode) {
             // currentSpeed += 200;
@@ -243,7 +259,7 @@ var sncf = {
         else {
             // Create a mountain
             var mountain;
-            var mountainWidth = Math.floor(Math.random() * 3 + 1);
+            mountainWidth = Math.floor(Math.random() * 3 + 1);
 
             if (isDarkMode) {
                 switch(mountainWidth) {
@@ -283,7 +299,7 @@ var sncf = {
         obstaclesCount += 1;
 
         // Store obstacles coords in array
-        obstaclesList.push({ xPos: obstacleXPos, type: obstacleType });
+        obstaclesList.push({ xPos: obstacleXPos, type: obstacleType, width: mountainWidth });
 
         var newXObstaclePosList = [];
         // Remove useless old X positions of obstacles
@@ -377,9 +393,10 @@ var sncf = {
             gameOverBanner.width = 546 * 1.4;
             gameOverBanner.height = 370 * 1.4;
 
-            var scoreLabelStyle = { font: "bold 95px Arial", fill: "#ae3738", boundsAlignH: "right", boundsAlignV: "right" };
+            var scoreLabelStyle = { font: "bold 95px Arial", fill: "#ae3738", boundsAlignH: "center", boundsAlignV: "middle" };
             var scoreLabel = game.add.text(__this.character.body.x - 40, 500, score, scoreLabelStyle);
             scoreLabel.fixedToCamera = true;
+            // scoreLabel.setTextBounds(__this.character.body.x - 200, 450, __this.character.body.x + 200, 550);
 
             restartLabelXPos = scoreLabel.x;
 
