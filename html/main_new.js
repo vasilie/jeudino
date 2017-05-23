@@ -112,10 +112,9 @@ var sncf = {
             this.gameOver(400);
         }
         else if (this.character.body.x > closestObstacleXPos['xPos'] - 125
-            && this.character.body.x < closestObstacleXPos['xPos'] + 125
+            && this.character.body.x < closestObstacleXPos['xPos'] + 150
             && this.character.body.y > 670
             && closestObstacleXPos['type'] === 1) {
-            console.log('width was ' + closestObstacleXPos['width']);
 
             if (closestObstacleXPos['width'] === 1 &&
                 this.character.body.x > closestObstacleXPos['xPos'] - 100
@@ -329,7 +328,7 @@ var sncf = {
 
         return curr;
     },
-    
+
     createTrafficLights: function() {
         // Setup traffic lights
         var feuRouge = game.add.sprite(300,200,'red');
@@ -339,7 +338,7 @@ var sncf = {
         feuJaune.alpha = 0;
         feuBleu.alpha = 0;-
 
-        game.add.tween(feuRouge).to( { alpha: 1 }, 1, "Linear", true, 500);
+            game.add.tween(feuRouge).to( { alpha: 1 }, 1, "Linear", true, 500);
         game.add.tween(feuJaune).to( { alpha: 1 }, 1, "Linear", true, 1500);
         var b = game.add.tween(feuBleu).to( { alpha: 1 }, 1, "Linear", true, 2500);
         b.onComplete.add(function(){
@@ -373,7 +372,7 @@ var sncf = {
 
     render: function() {
         /* game.debug.cameraInfo(game.camera, 32, 32);
-        game.debug.spriteCoords(this.character, 32, 500); */
+         game.debug.spriteCoords(this.character, 32, 500); */
         game.debug.geom(blueBackground, 'rgba(200,0,0,0.5)');
     },
 
@@ -397,7 +396,6 @@ var sncf = {
             var scoreLabel = game.add.text(__this.character.body.x - 40, 500, score, scoreLabelStyle);
             scoreLabel.anchor.setTo(0.25,0);
             scoreLabel.fixedToCamera = true;
-            // scoreLabel.setTextBounds(__this.character.body.x - 200, 450, __this.character.body.x + 200, 550);
 
             restartLabelXPos = scoreLabel.x;
 
