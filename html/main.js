@@ -1,6 +1,7 @@
 var game = new Phaser.Game(1200,675);
 
 var character,
+	godMode = false,
     obstacleXOffset,
     obstaclesList,
     closestObstacleXPos,
@@ -14,6 +15,7 @@ var character,
     lineScale,
     blueBgOffset = 0,
     obstaclesCount,
+	objects = [],
     restartLabelXPos,
     isGamePaused,
     currentSpeed;
@@ -53,12 +55,14 @@ var sncf = {
         game.load.audio('bg_music', ['audio/bg_music.mp3', 'audio/bg_music.ogg']);
         game.load.audio('jump', ['audio/jump.mp3', 'audio/jump.ogg']);
         game.load.physics("sprite_physics", "sprite_physics.json");
+		// this.createObstacle();
+		// this.createObstacle();
     },
 
     create: function(){
         // Setup game basic params
         game.stage.backgroundColor = '#fff';
-        game.world.setBounds(0, 0, 190020, 1070);
+        game.world.setBounds(0, 0, 1339020, 1070);
         game.world.scale.x = 0.7;
         game.world.scale.y = 0.7;
         obstacleXOffset= 0;
@@ -96,11 +100,20 @@ var sncf = {
         this.scoreCountLabel.fixedToCamera = true;
 
         // Create obstacles at specific intervals
-        game.time.events.loop(300, this.createObstacle, this);
+        // game.time.events.loop(800, this.createObstacle, this);
     },
 
     update: function(){
         // Check if game has already started
+		// console.log(this.character.body.x % 100);
+		if (this.character.body.x > lastObstacleXPos ){
+			lastObstacleXPos = objects[objects.length-1].x ;
+			console.log("creating obstacle");
+			setTimeout(function(){
+				sncf.createObstacle();
+
+			},100)
+		}
         if (!gameStarted) {
             this.character.body.x = 300;
         }
@@ -117,43 +130,58 @@ var sncf = {
         }
 
         // Check if user is hitting the closest obstacle, if not add 1 point
-        if (this.character.body.x > closestObstacleXPos['xPos'] - 80
-            && this.character.body.x < closestObstacleXPos['xPos'] + 80
-            && this.character.body.y > 700
+		var playerX = this.character.body.x,
+		    playerY = this.character.body.y,
+			closestObstX = closestObstacleXPos['xPos'];
+
+        if (playerX > closestObstX - 80
+            && playerX < closestObstX + 80
+            && playerY > 800
             && closestObstacleXPos['type'] === 0) {
-            this.gameOver(400);
+            this.gameOver(0);
         }
-        else if (this.character.body.x > closestObstacleXPos['xPos'] - 90
-            && this.character.body.x < closestObstacleXPos['xPos'] + 150
-            && this.character.body.y > 670
-            && closestObstacleXPos['type'] === 1) {
+        else if (playerX > closestObstX - 90
+            && playerX < closestObstX + 150
+            && playerY > 670
+            && closestObstacleXPos['type'] === 1 && !godMode) {
 
             if (closestObstacleXPos['width'] === 1 &&
-                this.character.body.x > closestObstacleXPos['xPos'] - 90
-                && this.character.body.x < closestObstacleXPos['xPos'] - 80) {
+                playerX > closestObstX - 90
+                && playerX < closestObstX - 80 && !godMode) {
                 this.gameOver(0);
             }
             else if (closestObstacleXPos['width'] === 2 &&
-                this.character.body.x > closestObstacleXPos['xPos'] - 90
-                && this.character.body.x < closestObstacleXPos['xPos'] + 50) {
+                playerX > closestObstX - 90
+                && playerX < closestObstX + 50 && !godMode) {
                 this.gameOver(0);
             }
             else if (closestObstacleXPos['width'] === 3) {
                 this.gameOver(0);
             }
         }
-        else if (this.character.body.x > closestObstacleXPos['xPos'] - 120
-            && this.character.body.x < closestObstacleXPos['xPos'] + 120
-            && lastObstacleXPos !== closestObstacleXPos['xPos']) {
+        else if (playerX > closestObstX - 120
+            && playerX < closestObstX + 120
+            && lastObstacleXPos !== closestObstX && !godMode) {
             score += 1;
             var s = "000000000" + score;
             // Add leading zeros to score
             this.scoreCountLabel.setText(s.substr(s.length-5));
-            lastObstacleXPos = closestObstacleXPos['xPos'];
+            lastObstacleXPos = closestObstX;
         }
+
+		for (i in objects){
+			if (objects[i].x <  game.camera.x - 500  ){
+				// console.log(objects[i]);
+				objects[i].kill();
+				objects[i].destroy();
+
+			}
+		}
+
     },
 
     createObstacle:function(){
+		console.log("im creating something");
         // var lineScale = 1;
         if (obstaclesCount.toString().slice(-1) === "5") {
             isDarkMode = true;
@@ -181,14 +209,18 @@ var sncf = {
         if (spawnDrone === 1) {
             if (isDarkMode) {
                 drone = this.game.add.sprite(obstacleXOffset,Math.floor(Math.random() * 200 + 300),"drone_neg");
+
             }
             else {
                 drone = this.game.add.sprite(obstacleXOffset,Math.floor(Math.random() * 200 + 300),"drone");
             }
+			drone.checkWorldBounds = true;
+			drone.events.onOutOfBounds.add( goodbye, this );
         }
         if (drone) {
             dronesGroup.add(drone);
             game.world.sendToBack(dronesGroup);
+			objects.push(drone);
         }
 
         /**
@@ -221,7 +253,9 @@ var sncf = {
         else {
             decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType);
         }
-
+		objects.push(decor);
+		decor.checkWorldBounds = true;
+		decor.events.onOutOfBounds.add( goodbye, this );
         decorsGroups.add(decor);
 
         game.world.sendToBack(decorsGroups);
@@ -244,6 +278,7 @@ var sncf = {
          * First, create a visual line
          */
         var line = game.add.graphics(obstacleXOffset,900);
+		objects.push(line);
         if (isDarkMode) {
             line.lineStyle(18,0xffffff);
         }
@@ -284,7 +319,7 @@ var sncf = {
 
             var blueRectsBgGroup = game.add.group();
             blueRectsBgGroup.add(blueRectangleBg);
-
+			objects.push(blueRectangleBg);
             game.world.sendToBack(blueRectsBgGroup);
         }
 
@@ -298,6 +333,8 @@ var sncf = {
             else {
                 hole = this.game.add.sprite(obstacleXPos,978,"hole");
             }
+			objects.push(hole);
+			hole.checkWorldBounds = true;
             game.physics.p2.enable(hole);
             hole.body.clearShapes();
             hole.body.loadPolygon('sprite_physics', 'trou');
@@ -306,8 +343,7 @@ var sncf = {
             hole.body.outOfBoundsKill = true;
 
             obstacleXOffset += lineWidth + hole.width - 25;
-        }
-        else {
+        } else {
             // Create a mountain
             var mountain;
             mountainWidth = Math.floor(Math.random() * 3 + 1);
@@ -338,8 +374,11 @@ var sncf = {
                         break;
                 }
             }
+			mountain.checkWorldBounds = true;
+			mountain.events.onOutOfBounds.add( goodbye, this );
 
             game.physics.p2.enable(mountain);
+			objects.push(mountain);
             mountain.body.fixedRotation = true;
             mountain.body.static = true;
             mountain.body.outOfBoundsKill = true;
@@ -354,17 +393,20 @@ var sncf = {
 
         var newXObstaclePosList = [];
         // Remove useless old X positions of obstacles
-        for (var i = 0; i < obstaclesList.length; i++) {
-            // If character is beyond current obstacle, delete it
-            if (obstaclesList[i]['xPos'] > this.character.body.x) {
-                newXObstaclePosList.push(obstaclesList[i]);
-            }
-        }
-        obstaclesList = newXObstaclePosList;
+        // for (var i = 0; i < obstaclesList.length; i++) {group
+        //     // If character is beyond current obstacle, delete it
+        //     if (obstaclesList[i]['xPos'] > this.character.body.x) {
+        //         // newXObstaclePosList.push(obstaclesList[i]);
+		// 		console.log('destroyed');
+		// 		// obstaclesList.splice(i,1);
+        //     }
+        // obstaclesList = newXObstaclePosList;
 
         this.getClosestObstacleXPos();
 
         this.character.body.velocity.x = 500 + currentSpeed;
+		console.log("objects" +objects.length);
+		console.log("list" +obstaclesList.length);
     },
 
     getClosestObstacleXPos: function() {
@@ -380,7 +422,7 @@ var sncf = {
 
         return curr;
     },
-    
+
     createTrafficLights: function() {
         // Setup traffic lights
         var feuRouge = game.add.sprite(300,200,'red');
@@ -422,11 +464,11 @@ var sncf = {
         this.jumpSound.volume = 1;
     },
 
-    render: function() {
-        /* game.debug.cameraInfo(game.camera, 32, 32);
-        game.debug.spriteCoords(this.character, 32, 500); */
-        game.debug.geom(blueBackground, 'rgba(200,0,0,0.5)');
-    },
+    // render: function() {
+    //     /* game.debug.cameraInfo(game.camera, 32, 32);
+    //     game.debug.spriteCoords(this.character, 32, 500); */
+    //     game.debug.geom(blueBackground, 'rgba(200,0,0,0.5)');
+    // },
 
     gameOver: function(timeoutDuration) {
         var __this = this;
@@ -472,6 +514,9 @@ document.body.onkeyup = function(e){
         sncf.restartGame();
     }
 }
-
+function goodbye(obj) {
+	console.log('destroying'+obj);
+	obj.destroy();
+}
 game.state.add('sncf',sncf);
 game.state.start('sncf');
