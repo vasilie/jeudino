@@ -1,7 +1,7 @@
 var game = new Phaser.Game(1200,675);
 
 var character,
-	godMode = false,
+	godMode = true,
     obstacleXOffset,
     obstaclesList,
     closestObstacleXPos,
@@ -17,6 +17,7 @@ var character,
     obstaclesCount,
 	objects = [],
     restartLabelXPos,
+	lastTriggeredPos = 0,
     isGamePaused,
     currentSpeed;
 
@@ -55,8 +56,7 @@ var sncf = {
         game.load.audio('bg_music', ['audio/bg_music.mp3', 'audio/bg_music.ogg']);
         game.load.audio('jump', ['audio/jump.mp3', 'audio/jump.ogg']);
         game.load.physics("sprite_physics", "sprite_physics.json");
-		// this.createObstacle();
-		// this.createObstacle();
+
     },
 
     create: function(){
@@ -85,6 +85,7 @@ var sncf = {
         this.createCharacter();
         this.createTrafficLights();
         this.createObstacle();
+        this.createObstacle();
 
         // Setup audio files
         this.bgMusic = new Audio('audio/bg_music.mp3');
@@ -106,14 +107,6 @@ var sncf = {
     update: function(){
         // Check if game has already started
 		// console.log(this.character.body.x % 100);
-		if (this.character.body.x > lastObstacleXPos ){
-			lastObstacleXPos = objects[objects.length-1].x ;
-			console.log("creating obstacle");
-			setTimeout(function(){
-				sncf.createObstacle();
-
-			},100)
-		}
         if (!gameStarted) {
             this.character.body.x = 300;
         }
@@ -121,6 +114,12 @@ var sncf = {
             game.physics.p2.gravity.y = 2100;
         }
 
+		if (this.character.body.x > lastTriggeredPos - 1000 ){
+			lastTriggeredPos = this.character.body.x + 2000;
+			console.log("creating obstacle");
+			sncf.createObstacle();
+
+		}
         // If user is pressing [SPACE] and character is on the line, do something (jump)
         if ((game.input.keyboard.isDown(Phaser.Keyboard.UP) ||
             game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
@@ -453,7 +452,7 @@ var sncf = {
         this.character.body.clearShapes();
         this.character.body.loadPolygon('sprite_physics', "character");
         this.character.body.fixedRotation = true;
-        this.character.body.bounce = 0.1;
+        // this.character.body.bounce = 0.1;
 
         game.camera.follow(this.character);
     },
@@ -464,11 +463,19 @@ var sncf = {
         this.jumpSound.volume = 1;
     },
 
-    // render: function() {
-    //     /* game.debug.cameraInfo(game.camera, 32, 32);
-    //     game.debug.spriteCoords(this.character, 32, 500); */
-    //     game.debug.geom(blueBackground, 'rgba(200,0,0,0.5)');
-    // },
+    render: function() {
+        /* game.debug.cameraInfo(game.camera, 32, 32);
+        game.debug.spriteCoords(this.character, 32, 500); */
+        // game.debug.geom(blueBackground, 'rgba(200,0,0,0.5)');
+		game.debug.spriteInfo(this.character, 32, 32);
+		// game.debug.spriteBounds(this.character);
+		game.debug.body(this.character);
+		for (i in objects){
+			game.debug.body(objects[i]);
+			// game.debug.spriteBounds(objects[i] );
+			game.debug.geom(objects[i], 'red');
+		}
+    },
 
     gameOver: function(timeoutDuration) {
         var __this = this;
