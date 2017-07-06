@@ -77,12 +77,12 @@ var sncf = {
         // Setup game basic params
         game.stage.backgroundColor = '#fff';
         game.world.setBounds(0, 0, 1339020, 1080);
-        game.world.scale.x = 0.6;
-        game.world.scale.y = 0.6;
+        game.world.scale.x = 0.7;
+        game.world.scale.y = 0.7;
         obstacleXOffset= 0;
         obstaclesList = [];
         closestObstacleXPos = 0;
-        currentSpeed = 400;
+        currentSpeed = 200;
         score = 0;
         gameStarted = false;
         currentBgIsDark = false;
@@ -140,7 +140,7 @@ var sncf = {
         // Check if game has already started
 		// console.log(this.character.body.x % 100);
 
-		character.body.velocity.x = 700;
+		character.body.velocity.x = 600 + currentSpeed;
         if (!gameStarted) {
             this.character.body.x = 300;
         }
@@ -151,6 +151,7 @@ var sncf = {
 		if (this.character.body.x > lastTriggeredPos ){
 			lastTriggeredPos = this.character.body.x + 1500;
 			console.log("creating obstacle");
+            sncf.createObstacle();
 			sncf.createObstacle();
 		}
         // If user is pressing [SPACE] and character is on the line, do something (jump)
@@ -205,7 +206,7 @@ var sncf = {
 			if (objects[i].x <  game.camera.x - 500  ){
 				// console.log(objects[i]);
 				objects[i].kill();
-				// objects[i].destroy();
+				objects[i].destroy();
 
 			}
 		}
@@ -360,7 +361,7 @@ var sncf = {
 
 				// blueRectangleBg.beginFill(0x0ff000f);
 				blueRectangleBg.moveTo(0,0);
-                blueRectangleBg.drawRect(0, 0, lineWidth + 310, 1900);
+                blueRectangleBg.drawRect(0, 0, lineWidth + 350, 1900);
             }
             // hole
             else {
@@ -475,7 +476,7 @@ var sncf = {
 
         // this.getClosestObstacleXPos();
 
-        this.character.body.velocity.x = 500 + currentSpeed;
+        this.character.body.velocity.x = 800 + currentSpeed;
 		console.log("objects" +objects.length);
 		console.log("list" +obstaclesList.length);
 		obstacleType = Math.floor(Math.random() * 2);
@@ -547,7 +548,7 @@ var sncf = {
     },
 
     jump: function() {
-        this.character.body.velocity.y = -800;
+        this.character.body.velocity.y = -700;
         this.jumpSound.play();
         this.jumpSound.volume = 1;
     },
