@@ -8,15 +8,18 @@ var character,
     closestObstacleXPos,
     lastObstacleXPos,
     blueBackground,
+	helpline,
     scoreCountLabel,
     isDarkMode,
 	isMountain = true,
 	darkFirst = true,
     gameStarted,
     score,
+	counter = 0,
     currentBgIsDark,
     lineScale,
     blueBgOffset = 0,
+
     obstaclesCount,
 	objects = [],
     restartLabelXPos,
@@ -24,6 +27,7 @@ var character,
     isGamePaused,
 	canJump = true,
     currentSpeed;
+
 	var playerCollisionGroup,
 		mountainCollisionGroup,
 		lineCollisionGroup,
@@ -33,7 +37,10 @@ var character,
 		obstacleGroup,
 		mountainGroup,
 	    blueRectsBgGroup,
-		groundLineGroup;
+		helplineGroup,
+		dronesGroup,
+		groundLineGroup,
+		decorsGroups;
 
 var sncf = {
     preload: function(){
@@ -101,6 +108,10 @@ var sncf = {
 	    groundLineGroup = game.add.group();
 	    obstacleGroup = game.add.group();
 		blueRectsBgGroup = game.add.group();
+	    dronesGroup = game.add.group();
+		decorsGroups = game.add.group();
+		helplineGroup = game.add.group();
+
 		mountainGroup.enableBody = true;
     	mountainGroup.physicsBodyType = Phaser.Physics.P2JS;
 
@@ -111,10 +122,10 @@ var sncf = {
 
 		game.physics.p2.updateBoundsCollisionGroup();
 
-
+		helpline = game.add.graphics(0, 900);
         this.createCharacter();
         this.createTrafficLights();
-        for (var i = 0; i < 5; i++){
+        for (var i = 0; i < 3; i++){
 			this.createObstacle();
 		}
 
@@ -139,7 +150,7 @@ var sncf = {
     update: function(){
         // Check if game has already started
 		// console.log(this.character.body.x % 100);
-
+		counter++;
 		character.body.velocity.x = 600 + currentSpeed;
         if (!gameStarted) {
             this.character.body.x = 300;
@@ -149,10 +160,10 @@ var sncf = {
         }
 
 		if (this.character.body.x > lastTriggeredPos ){
-			lastTriggeredPos = this.character.body.x + 1500;
+			lastTriggeredPos = this.character.body.x + 1000;
 			console.log("creating obstacle");
             sncf.createObstacle();
-			sncf.createObstacle();
+			// sncf.createObstacle();
 		}
         // If user is pressing [SPACE] and character is on the line, do something (jump)
         if ((game.input.keyboard.isDown(Phaser.Keyboard.UP) ||
@@ -201,13 +212,15 @@ var sncf = {
         //     this.scoreCountLabel.setText(s.substr(s.length-5));
         //     lastObstacleXPos = closestObstX;
         // }
+		if (counter % 20 == 0) {
+			for (i in objects){
 
-		for (i in objects){
-			if (objects[i].x <  game.camera.x - 500  ){
-				// console.log(objects[i]);
-				objects[i].kill();
-				objects[i].destroy();
-
+				if (objects[i].x <  game.camera.x - 500  ){
+					// console.log(objects[i]);
+					// objects[i].kill();
+					objects[i].destroy();
+					objects.splice(i,1);
+				}
 			}
 		}
 
@@ -215,17 +228,17 @@ var sncf = {
 
     createObstacle:function(){
 
-		createMeasure(obstacleXOffset);
+		// createMeasure(obstacleXOffset);
 
 		console.log("im creating something");
         // var lineScale = 1;
 
-		if (obstaclesCount.toString().slice(-1) === "0") {
-			darkFirst = true;
-		}
+		// if (obstaclesCount.toString().slice(-1) === "0" && obstacleType == 0) {
+		//
+		// }
         if (obstaclesCount.toString().slice(-1) === "5") {
             isDarkMode = true;
-
+			darkFirst = true;
             currentSpeed += 50;
         }
         else if ((obstaclesCount.toString().slice(-1) === "6"
@@ -243,7 +256,7 @@ var sncf = {
          * Spawn a drone
          */
         var spawnDrone = Math.floor(Math.random() * 3);
-        var dronesGroup = game.add.group();
+
 
         var drone;
         if (spawnDrone === 1) {
@@ -285,7 +298,7 @@ var sncf = {
             decorYPos = 680;
         }
 
-        var decorsGroups = game.add.group();
+
         var decor;
         if (isDarkMode) {
             decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType + "_neg");
@@ -318,7 +331,7 @@ var sncf = {
          * First, create a visual line
          */
         var line = game.add.graphics(obstacleXOffset,900);
-		createMeasure(obstacleXOffset);
+		// createMeasure(obstacleXOffset);
 		objects.push(line);
         if (isDarkMode) {
             line.lineStyle(18,0xffffff);
@@ -351,50 +364,70 @@ var sncf = {
         if (isDarkMode) {
             // currentSpeed += 200;
             var blueRectangleBg = game.add.graphics(obstacleXOffset, -300);
-            var helpLine = game.add.graphics(obstacleXOffset, 900);
 			blueRectangleBg.moveTo(0,0);
-			createMeasure(obstacleXOffset+1, "ffff00");
+			// createMeasure(obstacleXOffset+1, "ffff00");
             blueRectangleBg.beginFill(0x0f85c2);
             blueRectangleBg.lineStyle(0,0xff0000);
             // Mountain
             if (isMountain) {
 
-				// blueRectangleBg.beginFill(0x0ff000f);
+				// blueRectangleBg.beginFill(0x0ff000f); //red
 				blueRectangleBg.moveTo(0,0);
                 blueRectangleBg.drawRect(0, 0, lineWidth + 350, 1900);
             }
             // hole
             else {
-				// blueRectangleBg.beginFill(0x0ffff00);
+				// blueRectangleBg.beginFill(0x0ffff00); //yellow
 				blueRectangleBg.moveTo(0,0);
-                blueRectangleBg.drawRect(23, 0, lineWidth + 350, 1900);
-				helpLine.moveTo(0,0);
-				if (darkFirst){
-					helpLine.beginFill(0x0f85c2);
-					darkFirst = false;
-				} else {
-					helpLine.beginFill(0x000000);
-				}
-                helpLine.drawRect(0,-9, 22, 18);
-				game.world.bringToTop(helpLine);
+                blueRectangleBg.drawRect(23, 0, lineWidth + 330, 1900);
+				// if (darkFirst){
+				//
+				// 	darkFirst = false;
+				// } else {
+				// 	helpLine.beginFill(0x000000);
+				// }
+
+
             }
 
             blueRectsBgGroup.add(blueRectangleBg);
 			objects.push(blueRectangleBg);
             game.world.sendToBack(blueRectsBgGroup);
-        }
+        } else {
+			var blueRectangleBg = game.add.graphics(obstacleXOffset, -300);
+			blueRectangleBg.moveTo(0,0);
+			// createMeasure(obstacleXOffset+1, "ffff00");
+            blueRectangleBg.lineStyle(0,0xffffff);
+			blueRectangleBg.beginFill(0xffffff);
+			blueRectangleBg.moveTo(0,0);
+			if (isMountain){
+				blueRectangleBg.drawRect(0, 0, 300, 1900);
+			} else {
+				blueRectangleBg.drawRect(23, 0, 300, 1900);
+			}
+			blueRectsBgGroup.add(blueRectangleBg);
+		}
 
         var obstacleXPos = obstacleXOffset + lineWidth + 150;
         if (obstacleType === 0) {
 			isMountain = false;
             // Create a hole
-            var hole;
-            if (isDarkMode) {
+
+			var hole;
+			helpLine = game.add.graphics(obstacleXPos, 900);
+			// helpLine.moveTo(40,0);
+			if (isDarkMode) {
                 hole = this.game.add.sprite(obstacleXPos -6,987,"hole_neg");
+				helpLine.beginFill(0xffffff);
             }
             else {
+				helpLine.beginFill(0x0f85c2);
+				// helpLine.beginFill(0x00ff00);
                 hole = this.game.add.sprite(obstacleXPos-6,987,"hole");
             }
+			helpLine.drawRect(138,-9, 22, 20);
+			helplineGroup.add(helpLine);
+
 			objects.push(hole);
 			hole.checkWorldBounds = true;
             game.physics.p2.enable(hole);
@@ -405,7 +438,7 @@ var sncf = {
             hole.body.outOfBoundsKill = true;
 
             obstacleXOffset += lineWidth + hole.width - 44;
-			createMeasure(obstacleXOffset);
+			// createMeasure(obstacleXOffset);
 			// game.world.sendToBack(hole);
 			hole.body.setCollisionGroup(holeCollisionGroup);
 			hole.body.collides(playerCollisionGroup);
@@ -454,8 +487,8 @@ var sncf = {
 			mountain.body.setCollisionGroup(mountainCollisionGroup);
 			mountain.body.collides( playerCollisionGroup);
             obstacleXOffset += lineWidth + 115 * mountainWidth;
-			createMeasure(obstacleXOffset);
-
+			// createMeasure(obstacleXOffset);
+			// game.world.bringToTop(helplineGroup);
         }
 
         obstaclesCount += 1;
@@ -480,6 +513,7 @@ var sncf = {
 		console.log("objects" +objects.length);
 		console.log("list" +obstaclesList.length);
 		obstacleType = Math.floor(Math.random() * 2);
+		game.world.bringToTop(helplineGroup);
     },
 
     getClosestObstacleXPos: function() {
