@@ -127,7 +127,7 @@ var sncf = {
 		helpline = game.add.graphics(0, 900);
         this.createCharacter();
         this.createTrafficLights();
-        for (var i = 0; i < 5; i++){
+        for (var i = 0; i < 8; i++){
 			this.createObstacle();
 		}
 
@@ -137,7 +137,7 @@ var sncf = {
         this.gameOverSound = new Audio('audio/game_over.mp3');
 
         // Play background audio
-        // this.bgMusic.play();
+        this.bgMusic.play();
         this.bgMusic.volume = 0.02;
 
         var scoreCountStyle = { font: "bold 82px Arial", fill: "#33", boundsAlignH: "right", boundsAlignV: "right" };
@@ -145,7 +145,7 @@ var sncf = {
         this.scoreCountLabel.fixedToCamera = true;
 
         // Create obstacles at specific intervals
-        // game.time.events.loop(800, this.createObstacle, this);
+        game.time.events.loop(800, this.createObstacle, this);
 		character = this.character;
     },
 
@@ -161,11 +161,11 @@ var sncf = {
             game.physics.p2.gravity.y = 2300;
         }
 
-		if (this.character.body.x > lastTriggeredPos ){
-			lastTriggeredPos = this.character.body.x + 1100;
+		if (this.character.body.x >= lastTriggeredPos ){
+			lastTriggeredPos = this.character.body.x +400;
 			console.log("creating obstacle");
             // sncf.createObstacle();
-            sncf.createObstacle();
+            // sncf.createObstacle();
 			// sncf.createObstacle();
 		}
         // If user is pressing [SPACE] and character is on the line, do something (jump)
@@ -436,14 +436,13 @@ var sncf = {
 			if (isDarkMode) {
                 hole = this.game.add.sprite(obstacleXPos -6,987,"hole_neg");
 				helpLine.beginFill(0xffffff);
-				pointPositions.push(obstacleXPos+10);
             }
             else {
 				helpLine.beginFill(0x0f85c2);
 				// helpLine.beginFill(0x00ff00);
                 hole = this.game.add.sprite(obstacleXPos-6,987,"hole");
-				pointPositions.push(obstacleXPos+10);
             }
+			pointPositions.push(obstacleXPos+300);
 			helpLine.drawRect(138,-9, 22, 20);
 			helplineGroup.add(helpLine);
 
@@ -493,7 +492,7 @@ var sncf = {
                         break;
                 }
             }
-			pointPositions.push(obstacleXPos+100);
+			pointPositions.push(obstacleXPos+300);
 			// mountain.checkWorldBounds = true;
 			// mountain.events.onOutOfBounds.add( goodbye, this );
 
@@ -584,11 +583,11 @@ var sncf = {
         this.character.body.bounce = 1;
 		this.character.body.collides(mountainCollisionGroup, function(){
 			console.log("Colided with mountain");
-			// this.gameOver(0);
+			this.gameOver(0);
 		}, this);
 		this.character.body.collides(holeCollisionGroup, function(){
 			console.log("Colided with hole");
-			// this.gameOver(0);
+			this.gameOver(0);
 		}, this);
 		this.character.body.collides(lineCollisionGroup, function(){
 			console.log("Colided with ground");
@@ -645,7 +644,7 @@ var sncf = {
 			sncf.bgMusic.currentTime = 0;
             __this.game.input.onDown.add(__this.restartGame, self);
 
-            // __this.gameOverSound.play();
+            __this.gameOverSound.play();
         }, timeoutDuration);
     },
 
@@ -653,6 +652,7 @@ var sncf = {
         game.paused = false;
         isGamePaused = false;
         game.state.start('sncf');
+		pointPositions = [];
     }
 };
 
