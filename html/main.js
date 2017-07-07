@@ -1,4 +1,4 @@
-var game = new Phaser.Game(1200,675);
+var game = new Phaser.Game(1200,675, Phaser.CANVAS);
 
 var character,
 	godMode = true,
@@ -25,7 +25,7 @@ var character,
     restartLabelXPos,
 	lastTriggeredPos = 0,
     isGamePaused,
-	canJump = true,
+	canJump = false,
     currentSpeed;
 
 	var playerCollisionGroup,
@@ -44,6 +44,7 @@ var character,
 
 var sncf = {
     preload: function(){
+        game.stage.backgroundColor = '#ffffff';
         game.load.image('character','img/ed.png');
         game.load.image('hole','img/Trou.png');
         game.load.image('hole_neg','img/Trou-neg.png');
@@ -82,7 +83,7 @@ var sncf = {
 
     create: function(){
         // Setup game basic params
-        game.stage.backgroundColor = '#fff';
+
         game.world.setBounds(0, 0, 1339020, 1080);
         game.world.scale.x = 0.7;
         game.world.scale.y = 0.7;
@@ -212,10 +213,10 @@ var sncf = {
         //     this.scoreCountLabel.setText(s.substr(s.length-5));
         //     lastObstacleXPos = closestObstX;
         // }
-		if (counter % 20 == 0) {
+		if (counter % 50 == 0) {
 			for (i in objects){
 
-				if (objects[i].x <  game.camera.x - 500  ){
+				if (objects[i].x <  game.camera.x - 600  ){
 					// console.log(objects[i]);
 					// objects[i].kill();
 					objects[i].destroy();
@@ -393,7 +394,7 @@ var sncf = {
             blueRectsBgGroup.add(blueRectangleBg);
 			objects.push(blueRectangleBg);
             game.world.sendToBack(blueRectsBgGroup);
-        } else {
+        } else { 
 			var blueRectangleBg = game.add.graphics(obstacleXOffset, -300);
 			blueRectangleBg.moveTo(0,0);
 			// createMeasure(obstacleXOffset+1, "ffff00");
@@ -406,6 +407,7 @@ var sncf = {
 				blueRectangleBg.drawRect(23, 0, 300, 1900);
 			}
 			blueRectsBgGroup.add(blueRectangleBg);
+            game.world.sendToBack(blueRectsBgGroup);
 		}
 
         var obstacleXPos = obstacleXOffset + lineWidth + 150;
@@ -564,11 +566,11 @@ var sncf = {
         this.character.body.bounce = 1;
 		this.character.body.collides(mountainCollisionGroup, function(){
 			console.log("Colided with mountain");
-			// this.gameOver(0);
+			this.gameOver(0);
 		}, this);
 		this.character.body.collides(holeCollisionGroup, function(){
 			console.log("Colided with hole");
-			// this.gameOver(0);
+			this.gameOver(0);
 		}, this);
 		this.character.body.collides(lineCollisionGroup, function(){
 			console.log("Colided with ground");
