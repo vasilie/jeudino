@@ -16,6 +16,7 @@ var character,
     gameStarted,
     score,
 	counter = 0,
+	pointPositions = [],
     currentBgIsDark,
     lineScale,
     blueBgOffset = 0,
@@ -126,7 +127,7 @@ var sncf = {
 		helpline = game.add.graphics(0, 900);
         this.createCharacter();
         this.createTrafficLights();
-        for (var i = 0; i < 3; i++){
+        for (var i = 0; i < 5; i++){
 			this.createObstacle();
 		}
 
@@ -136,7 +137,7 @@ var sncf = {
         this.gameOverSound = new Audio('audio/game_over.mp3');
 
         // Play background audio
-        this.bgMusic.play();
+        // this.bgMusic.play();
         this.bgMusic.volume = 0.02;
 
         var scoreCountStyle = { font: "bold 82px Arial", fill: "#33", boundsAlignH: "right", boundsAlignV: "right" };
@@ -152,7 +153,7 @@ var sncf = {
         // Check if game has already started
 		// console.log(this.character.body.x % 100);
 		counter++;
-		character.body.velocity.x = 600 + currentSpeed;
+		character.body.velocity.x = 700 + currentSpeed;
         if (!gameStarted) {
             this.character.body.x = 300;
         }
@@ -161,8 +162,9 @@ var sncf = {
         }
 
 		if (this.character.body.x > lastTriggeredPos ){
-			lastTriggeredPos = this.character.body.x + 1000;
+			lastTriggeredPos = this.character.body.x + 1100;
 			console.log("creating obstacle");
+            // sncf.createObstacle();
             sncf.createObstacle();
 			// sncf.createObstacle();
 		}
@@ -224,7 +226,20 @@ var sncf = {
 				}
 			}
 		}
-
+		var count = 0;
+		for (i =score; i<pointPositions.length; i++){
+			count++;
+			console.log("counted "+count+ ' times');
+			if (character.body.x > pointPositions[i]){
+				score = i;
+				score += 1;
+	            var s = "000000000" + score;
+	            // Add leading zeros to score
+	            this.scoreCountLabel.setText(s.substr(s.length-5));
+			} else {
+				break;
+			}
+		}
     },
 
     createObstacle:function(){
@@ -394,7 +409,7 @@ var sncf = {
             blueRectsBgGroup.add(blueRectangleBg);
 			objects.push(blueRectangleBg);
             game.world.sendToBack(blueRectsBgGroup);
-        } else { 
+        } else {
 			var blueRectangleBg = game.add.graphics(obstacleXOffset, -300);
 			blueRectangleBg.moveTo(0,0);
 			// createMeasure(obstacleXOffset+1, "ffff00");
@@ -421,11 +436,13 @@ var sncf = {
 			if (isDarkMode) {
                 hole = this.game.add.sprite(obstacleXPos -6,987,"hole_neg");
 				helpLine.beginFill(0xffffff);
+				pointPositions.push(obstacleXPos+10);
             }
             else {
 				helpLine.beginFill(0x0f85c2);
 				// helpLine.beginFill(0x00ff00);
                 hole = this.game.add.sprite(obstacleXPos-6,987,"hole");
+				pointPositions.push(obstacleXPos+10);
             }
 			helpLine.drawRect(138,-9, 22, 20);
 			helplineGroup.add(helpLine);
@@ -476,6 +493,7 @@ var sncf = {
                         break;
                 }
             }
+			pointPositions.push(obstacleXPos+100);
 			// mountain.checkWorldBounds = true;
 			// mountain.events.onOutOfBounds.add( goodbye, this );
 
@@ -566,11 +584,11 @@ var sncf = {
         this.character.body.bounce = 1;
 		this.character.body.collides(mountainCollisionGroup, function(){
 			console.log("Colided with mountain");
-			this.gameOver(0);
+			// this.gameOver(0);
 		}, this);
 		this.character.body.collides(holeCollisionGroup, function(){
 			console.log("Colided with hole");
-			this.gameOver(0);
+			// this.gameOver(0);
 		}, this);
 		this.character.body.collides(lineCollisionGroup, function(){
 			console.log("Colided with ground");
@@ -596,10 +614,6 @@ var sncf = {
 		// game.debug.spriteInfo(this.character, 32, 32);
 		// game.debug.spriteBounds(this.character);
 		// game.debug.body(this.character);
-		for (i in groundLineGroup.children){
-			game.debug.body(groundLineGroup.children[i]);
-			game.debug.geom(groundLineGroup.children[i], 'red');
-		}
     },
 
     gameOver: function(timeoutDuration) {
@@ -627,7 +641,8 @@ var sncf = {
 
             __this.game.paused = true;
             isGamePaused = true;
-
+			sncf.bgMusic.pause();
+			sncf.bgMusic.currentTime = 0;
             __this.game.input.onDown.add(__this.restartGame, self);
 
             // __this.gameOverSound.play();
