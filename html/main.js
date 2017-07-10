@@ -16,6 +16,7 @@ var character,
     gameStarted,
     score,
 	counter = 0,
+	decor,
 	pointPositions = [],
     currentBgIsDark,
     lineScale,
@@ -218,7 +219,7 @@ var sncf = {
 		if (counter % 50 == 0) {
 			for (i in objects){
 
-				if (objects[i].x <  game.camera.x - 600  ){
+				if (objects[i].x <  game.camera.x - 1600  ){
 					// console.log(objects[i]);
 					// objects[i].kill();
 					objects[i].destroy();
@@ -298,30 +299,35 @@ var sncf = {
         var decorType = Math.floor(Math.random() * 5) + 1;
         var decorYPos = 0;
 
+		decorYPos = 422;
+
         if (decorType === 1) {
-            decorYPos = 650;
+            decorYPos = 422;
         }
         else if (decorType === 2) {
-            decorYPos = 470;
+            decorYPos = 422;
         }
         else if (decorType === 3) {
-            decorYPos = 700;
+            decorYPos = 521;
         }
         else if (decorType === 4) {
-            decorYPos = 650;
+            decorYPos = 422;
         }
         else if (decorType === 5) {
-            decorYPos = 680;
+            decorYPos = 422;
+        }
+
+		if (obstaclesCount % 10 <= 3 || obstaclesCount % 10 >= 5  && obstaclesCount % 10 <= 8) {
+
+			if (isDarkMode) {
+				decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType + "_neg");
+			}
+			else {
+				decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType);
+			}
         }
 
 
-        var decor;
-        if (isDarkMode) {
-            decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType + "_neg");
-        }
-        else {
-            decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType);
-        }
 		objects.push(decor);
 		decor.checkWorldBounds = true;
 		decor.events.onOutOfBounds.add( goodbye, this );
@@ -338,7 +344,7 @@ var sncf = {
         else  {
             lineScale = Math.random() * 2 + 0.5;
         }
-        var lineWidth = 500 * lineScale;
+        var lineWidth = 850 * lineScale;
 
 
         // var obstacleType = 0;
@@ -644,7 +650,7 @@ var sncf = {
 			sncf.bgMusic.currentTime = 0;
             __this.game.input.onDown.add(__this.restartGame, self);
 
-            __this.gameOverSound.play();
+            // __this.gameOverSound.play();
         }, timeoutDuration);
     },
 
