@@ -92,7 +92,7 @@ var sncf = {
         obstacleXOffset= 0;
         obstaclesList = [];
         closestObstacleXPos = 0;
-        currentSpeed = 200;
+        currentSpeed = 250;
         score = 0;
         gameStarted = false;
         currentBgIsDark = false;
@@ -219,7 +219,7 @@ var sncf = {
 		if (counter % 50 == 0) {
 			for (i in objects){
 
-				if (objects[i].x <  game.camera.x - 1600  ){
+				if (objects[i].x <  game.camera.x - 2000  ){
 					// console.log(objects[i]);
 					// objects[i].kill();
 					objects[i].destroy();
@@ -278,11 +278,11 @@ var sncf = {
         var drone;
         if (spawnDrone === 1) {
             if (isDarkMode) {
-                drone = this.game.add.sprite(obstacleXOffset,Math.floor(Math.random() * 200 + 300),"drone_neg");
+                drone = this.game.add.sprite(obstacleXOffset + 50,Math.floor(Math.random() * 200 + 300),"drone_neg");
 
             }
             else {
-                drone = this.game.add.sprite(obstacleXOffset,Math.floor(Math.random() * 200 + 300),"drone");
+                drone = this.game.add.sprite(obstacleXOffset + 50,Math.floor(Math.random() * 200 + 300),"drone");
             }
 			drone.checkWorldBounds = true;
 			drone.events.onOutOfBounds.add( goodbye, this );
@@ -297,34 +297,50 @@ var sncf = {
          * Spawn a decor
          */
         var decorType = Math.floor(Math.random() * 5) + 1;
+        // var decorType = 3; // for testing
         var decorYPos = 0;
+		var lineLength = 850;
+		var additionalOffset = 20;
 
 		decorYPos = 422;
 
         if (decorType === 1) {
             decorYPos = 422;
+			lineLength = 900;
+			additionalOffset = 70;
         }
         else if (decorType === 2) {
             decorYPos = 422;
+			lineLength = 1211;
+			additionalOffset = 30;
         }
         else if (decorType === 3) {
             decorYPos = 521;
+			lineLength = 1270;
+			additionalOffset = 40;
         }
         else if (decorType === 4) {
             decorYPos = 422;
+			lineLength = 1053;
+			additionalOffset = 40;
         }
         else if (decorType === 5) {
             decorYPos = 422;
+			lineLength = 1758;
+			additionalOffset = 30;
         }
 
-		if (obstaclesCount % 10 <= 3 || obstaclesCount % 10 >= 5  && obstaclesCount % 10 <= 8) {
+		if (obstaclesCount % 10 <= 4 || obstaclesCount % 10 >= 5  && obstaclesCount % 10 <= 9) {
 
 			if (isDarkMode) {
-				decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType + "_neg");
+				decor = this.game.add.sprite(obstacleXOffset + additionalOffset ,decorYPos,"decor_" + decorType + "_neg");
 			}
 			else {
-				decor = this.game.add.sprite(obstacleXOffset,decorYPos,"decor_" + decorType);
+				decor = this.game.add.sprite(obstacleXOffset + additionalOffset,decorYPos,"decor_" + decorType);
 			}
+			// for (i=0; i<decorType; i++){
+			// 	createMeasure(obstacleXOffset+i*25, 'ff0000');
+			// }
         }
 
 
@@ -339,12 +355,12 @@ var sncf = {
          * If first obstacle, make a long line
          */
         if (obstaclesCount === 0) {
-            lineScale = 2;
+            lineScale = 1.7;
         }
-        else  {
-            lineScale = Math.random() * 2 + 0.5;
-        }
-        var lineWidth = 850 * lineScale;
+        // else  {
+        //     lineScale = Math.random() * 2 + 0.5;
+        // }
+        var lineWidth = lineLength * lineScale;
 
 
         // var obstacleType = 0;
@@ -440,13 +456,13 @@ var sncf = {
 			helpLine = game.add.graphics(obstacleXPos, 900);
 			// helpLine.moveTo(40,0);
 			if (isDarkMode) {
-                hole = this.game.add.sprite(obstacleXPos -6,987,"hole_neg");
+                hole = this.game.add.sprite(obstacleXPos -6,990,"hole_neg");
 				helpLine.beginFill(0xffffff);
             }
             else {
 				helpLine.beginFill(0x0f85c2);
 				// helpLine.beginFill(0x00ff00);
-                hole = this.game.add.sprite(obstacleXPos-6,987,"hole");
+                hole = this.game.add.sprite(obstacleXPos-6,990,"hole");
             }
 			pointPositions.push(obstacleXPos+300);
 			helpLine.drawRect(138,-9, 22, 20);
@@ -650,7 +666,7 @@ var sncf = {
 			sncf.bgMusic.currentTime = 0;
             __this.game.input.onDown.add(__this.restartGame, self);
 
-            // __this.gameOverSound.play();
+            __this.gameOverSound.play();
         }, timeoutDuration);
     },
 
