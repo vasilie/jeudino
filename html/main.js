@@ -139,7 +139,8 @@ var sncf = {
 
         // Play background audio
         this.bgMusic.play();
-        this.bgMusic.volume = 0.02;
+        this.bgMusic.volume = 0.2;
+		this.gameOverSound.volume = 0.2;
 
         var scoreCountStyle = { font: "bold 82px Arial", fill: "#33", boundsAlignH: "right", boundsAlignV: "right" };
         this.scoreCountLabel = game.add.text(1000, 25, "00000", scoreCountStyle);
@@ -654,7 +655,7 @@ var sncf = {
             gameOverBanner.height = 370 * 1.4;
 
             var scoreLabelStyle = { font: "bold 95px Arial", fill: "#ae3738", boundsAlignH: "center", boundsAlignV: "middle" };
-            var scoreLabel = game.add.text(__this.character.body.x - 40, 500, score, scoreLabelStyle);
+            var scoreLabel = game.add.text(__this.character.body.x - 30, 463, score, scoreLabelStyle);
             scoreLabel.anchor.setTo(0.25,0);
             scoreLabel.fixedToCamera = true;
 
@@ -665,7 +666,7 @@ var sncf = {
 			sncf.bgMusic.pause();
 			sncf.bgMusic.currentTime = 0;
             __this.game.input.onDown.add(__this.restartGame, self);
-
+			$(".share").addClass('active');
             __this.gameOverSound.play();
         }, timeoutDuration);
     },
@@ -675,6 +676,7 @@ var sncf = {
         isGamePaused = false;
         game.state.start('sncf');
 		pointPositions = [];
+		$(".share").removeClass('active');
     }
 };
 

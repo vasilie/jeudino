@@ -7,12 +7,83 @@
 		canvas {
 			background-color: #fff;
 		}
+		.share {
+			position: absolute;
+			left: 591px;
+			top: 393px;
+			z-index: -19999999;
+			opacity: 0;
+		}
+		.share.active {
+			opacity: 1;
+			z-index: 100;
+		}
+		.share__item {
+			width:40px;
+			height: 40px;
+			position:relative;
+			/*background: red;*/
+			float: left;
+			margin:5px;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+		.fb {
+			background-image: url(img/FB.png);
+
+		}
+		.tw {
+			background-image: url(img/TW.png);
+		}
+		#fb, #tw {
+			float: left;
+		}
 		</style>
+		<!-- You can use Open Graph tags to customize link previews.
+		Learn more: https://developers.facebook.com/docs/sharing/webmasters -->
+	  <meta property="og:url"           content="http://sncf.digital.com" />
+	  <meta property="og:type"          content="website" />
+	  <meta property="og:title"         content="Ed Gare - Le jeu" />
+	  <meta property="og:description"   content="Ed Gare - Le jeu" />
+	  <meta property="og:image"         content="img/share/Jeu-Edgar.png" />
 	</head>
 	<body>
-		<!-- <script src="phaser.min.js"></script> -->
+		<div class="share">
+			<div id="fb" data-url="http://sncf.digital.com" data-text="Ed Gare - Le jeu" data-title="share"></div>
+			<div id="tw" data-url="http://sncf.digital.com" data-text="Ed Gare - Le jeu" data-title="share"></div>
+		</div>
+		<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+		<script src="vendor/sharrre/jquery.sharrre.min.js"></script>
 		<script src="phaser2.8.0.min.js"></script>
 		<script src="main.js"></script>
 		<script src='debugPhaser.js'></script>
+		<script type="text/javascript">
+		$('#fb').sharrre({
+			share: {
+				facebook: true,
+			},
+			template:'<div class="share__item fb" ></div>',
+			buttons:false,
+			count:false,
+			url: 'http://sncf.digital.com',
+			enableHover: false,
+			click: function (api, options) {
+				api.openPopup('facebook');
+			}
+		});
+		$('#tw').sharrre({
+			share: {
+				twitter: true,
+			},
+			template:'<div class="share__item tw" ></div>',
+			buttons:false,
+			count:false,
+			url: 'http://sncf.digital.com',
+			enableHover: false,
+			click: function (api, options) {
+				api.openPopup('twitter');
+			}
+		});
+		</script>
 	</body>
 </html>
